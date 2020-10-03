@@ -112,17 +112,6 @@ void ProcessInput() {
     }
 }
 float lastTicks = 0.0f;
-//void Update() {
-//    float ticks = (float) SDL_GetTicks() / 1000.0f;
-//    float deltaTime = ticks - lastTicks;
-//    lastTicks = ticks;
-//    player_x += 1.0f * deltaTime;
-//    player_rotate += 90.0f * deltaTime;
-//    modelMatrix = glm::mat4(1.0f);
-//    modelMatrix2 = glm::translate(modelMatrix,glm::vec3(player_x,2.0f,0.0f));
-//    modelMatrix = glm::rotate(modelMatrix,glm::radians(player_rotate),glm::vec3(0.0f,0.0f,1.0f));
-//
-//}
 
 bool isCollision(){
     float xdist = fabs(player_position.x - ball_position.x) - ((0.4f + 0.4f) / 2.0f);
@@ -149,18 +138,22 @@ void Update() {
         // Add (direction * units per second * elapsed time)
         player_position += player_movement * player_speed * deltaTime;
         player_position2 += player_movement2 * player_speed * deltaTime;
-    //    ball_position += ball_movement * player_speed * deltaTime;
-        if (player_position.y >= -2.75f && player_position.y <= 2.75f){
-            modelMatrix2 = glm::mat4(1.0f);
-            modelMatrix2 = glm::translate(modelMatrix2, player_position);
+        if (player_position.y < -2.75f ){
+            player_position.y = -2.75f;
         }
-        if (player_position2.y >= -2.75f && player_position2.y <= 2.75f){
-            modelMatrix3 = glm::mat4(1.0f);
-            modelMatrix3 = glm::translate(modelMatrix3, player_position2);
+        if (player_position.y > 2.75f){
+            player_position.y = 2.75f;
         }
+        if (player_position2.y < -2.75f ){
+            player_position2.y = -2.75f;
+        }
+        if (player_position2.y > 2.75f){
+            player_position2.y = 2.75f;
+        }
+        
         if (start){
             ball_position.x += direction_x * player_speed * deltaTime;
-            ball_position.y +=  0.5f * direction_y * player_speed * deltaTime;
+            ball_position.y += direction_y * player_speed * deltaTime;
         }
         if (isCollision()){
             direction_x = -direction_x;
@@ -178,26 +171,31 @@ void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
     
     program.SetModelMatrix(modelMatrix);
-    float vertices_s[] = { 0.2f, 0.2f, 0.2f, -0.2f, -0.2f, -0.2f,-0.2f,0.2f };
+    float vertices_s[] = {  -0.2f, -0.2f,   0.2f, -0.2f,   0.2f, 0.2f,   -0.2f, -0.2f,   0.2f, 0.2f,   -0.2f, 0.2f};
     glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices_s);
     glEnableVertexAttribArray(program.positionAttribute);
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(program.positionAttribute);
     
-//    modelMatrix2 = glm::mat4(5.0f);
+    float vertices_p[] = { 0.2f, 1.0f, 0.2f, -1.0f, -0.2f, -1.0f,0.2f, 1.0f,-0.2f, -1.0f,-0.2f,1.0f };
+    
+    modelMatrix2 = glm::mat4(1.0f);
+    modelMatrix2 = glm::translate(modelMatrix2,glm::vec3(player_position.x,player_position.y,0.0f));
+
     program.SetModelMatrix(modelMatrix2);
-    float vertices_p1[] = { 0.2f, 1.0f, 0.2f, -1.0f, -0.2f, -1.0f,-0.2f,1.0f };
-    glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices_p1);
+
+    glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices_p);
     glEnableVertexAttribArray(program.positionAttribute);
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(program.positionAttribute);
     
-//    modelMatrix3 = glm::mat4(5.0f);
+
+    modelMatrix3 = glm::mat4(1.0f);
+        modelMatrix3 = glm::translate(modelMatrix3,glm::vec3(player_position2.x,player_position2.y,0.0f));
     program.SetModelMatrix(modelMatrix3);
-    float vertices_p2[] = { 0.2f, 1.0f, 0.2f, -1.0f, -0.2f, -1.0f,-0.2f,1.0f };
-    glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices_p2);
+    glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices_p);
     glEnableVertexAttribArray(program.positionAttribute);
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(program.positionAttribute);
     
     SDL_GL_SwapWindow(displayWindow);
